@@ -1,0 +1,6 @@
+
+Basic tutorial for I2C lcd with Pi
+Main Link: http://www.circuitbasics.com/raspberry-pi-i2c-lcd-set-up-and-programming/
+
+Connection:
+Mostly lcd are powered with 5V supply, but unfortunately, Pi supports 3v3. So, attach lcd's Vcc to 3v3 supply on Pi and the rest is easy.
