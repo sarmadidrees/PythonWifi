@@ -1,0 +1,49 @@
+#python-wifi lib (https://pypi.python.org/pypi/python-wifi)
+
+from pythonwifi.iwlibs import Wireless
+wifi = Wireless('wlp7s0')
+wifi.getEssid()				#current wifi
+
+
+
+
+http://askubuntu.com/questions/16584/how-to-connect-and-disconnect-to-a-network-manually-in-terminal
+
+
+-HOW TO CALL A TERMINAL COMMAND FROM PYTHON SCRIPT (returns nothing)
+subprocess.call(['<TerminalCommand>'], shell = True)
+
+-Device down and up
+sudo ifconfig <WifiInterface> down  
+sudo ifconfig <WifiInterface> up
+
+-Scanning
+#from terminal
+1-sudo iwlist <WifiInterface> s
+2-nmcli dev wifi list
+#from script (stores output in 'str')
+1-output = subprocess.check_output(['sudo iwlist wlp7s0 s'], shell = True)
+2-output = subprocess.check_output(['nmcli dev wifi list'], shell = True)
+
+-Add network (it only adds a connection)
+nmcli con modify <WifiSSID> wifi-sec.key-mgmt wpa-psk
+nmcli con modify MyCafe wifi-sec.psk <WifiPassword>
+
+-Establish Connection
+#disconnect
+nmcli d disconnect iface <WifiInterface>
+#connect
+nmcli d wifi connect <WiFiSSID> password <WiFiPassword> iface <WifiInterface>
+
+-Current SSID
+iwgetid -r
+#from script (stores output in 'str')
+output = subprocess.check_output(['iwgetid -r'], shell = True)
+
+-Current IP
+#script
+p = subprocess.Popen(['hostname', '-I'], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+IP, err = p.communicate()
+
+
+
