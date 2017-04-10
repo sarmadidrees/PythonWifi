@@ -6,7 +6,7 @@ Launching a python script at Pi boot:
  $ sudo nano /etc/rc.local
 -Add commands to execute using absolute referencing of the file location (complete file path are preferred). Be sure to leave the line exit 0 at the end.
 example: sudo python /home/pi/sample.py &
-
+('&' make sures to not run in a forever loop)
 
 TODO:
 -Test on RspberryPi3
