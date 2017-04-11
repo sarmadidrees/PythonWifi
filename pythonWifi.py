@@ -2,10 +2,10 @@
 import time
 import subprocess
 
-subprocess.call(['ifconfig wlp7s0 down'], shell = True)
-time.sleep(1)
-subprocess.call(['ifconfig wlp7s0 up'], shell = True)
-time.sleep(1)
+#subprocess.call(['ifconfig wlp7s0 down'], shell = True)
+#time.sleep(1)
+#subprocess.call(['ifconfig wlp7s0 up'], shell = True)
+#time.sleep(1)
 
 wifiList = []
 priorityList = [
@@ -19,7 +19,7 @@ def scanWifi():
 	l1,l2 = 0,0
 	global wifiList
 	
-	totalList = subprocess.check_output(['iwlist wlp7s0 s'], shell = True)
+	totalList = subprocess.check_output(['iwlist wlan0 s'], shell = True)
 	complete = totalList.find('Cell')
 
 	while (complete != -1):
@@ -37,11 +37,11 @@ def connectWifi():
 	for nameP,password in priorityList:
 		for nameC in wifiList:
 			if nameP == nameC:
-				subprocess.call(['nmcli con modify '+str(priorityList[x][0])+' wifi-sec.key-mgmt wpa-psk'], shell = True )
+				#subprocess.call(['nmcli con modify '+str(priorityList[x][0])+' wifi-sec.key-mgmt wpa-psk'], shell = True )
 				#time.sleep(2)
-				subprocess.call(['nmcli con modify '+priorityList[x][0]+' wifi-sec.psk '+priorityList[x][1]], shell = True)	
+				#subprocess.call(['nmcli con modify '+priorityList[x][0]+' wifi-sec.psk '+priorityList[x][1]], shell = True)	
 				#time.sleep(2)
-				subprocess.call(['nmcli d wifi connect '+priorityList[x][0]+' password '+priorityList[x][1]+' iface'], shell = True)
+				subprocess.call(['nmcli d wifi connect '+priorityList[x][0]+' password '+priorityList[x][1]], shell = True)
 				connected = True
 				break
 
@@ -63,6 +63,6 @@ scanWifi()
 connectWifi()
 
 
-print(wifiList)
-print(currentSSID())
-print(currentIP())
+#print(wifiList)
+#print(currentSSID())
+#print(currentIP())
