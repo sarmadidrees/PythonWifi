@@ -9,9 +9,10 @@ import subprocess
 
 wifiList = []
 priorityList = [
-				['Tajurbagah','96020029'],
 				['ZONG-MBB-B310-02F1','1J3E47HQR381'],
-				['IMRLab','1qazxsw23edc']
+				['IMRLab','1qazxsw23edc'],
+				['Tajurbagah','96020029'],
+				['maaz1','786786786']
 				]
 
 
@@ -50,6 +51,8 @@ def connectWifi():
 			break
 
 
+'''
+#for just checking/print in console
 def currentSSID():
 	SSID = subprocess.check_output(['iwgetid -r'], shell = True)
 	return SSID
@@ -58,11 +61,7 @@ def currentIP():
 	p = subprocess.Popen(['hostname', '-I'], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 	IP, err = p.communicate()
 	return IP
+'''
 
 scanWifi()	
 connectWifi()
-
-
-#print(wifiList)
-#print(currentSSID())
-#print(currentIP())
