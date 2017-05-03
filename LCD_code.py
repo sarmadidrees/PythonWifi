@@ -1,20 +1,25 @@
 import I2Clcd_Lib
 import time
 import subprocess
+import psutil
+import os
 from datetime import datetime
 import RPi.GPIO as GPIO 
 
-wifiScriptPath = "/home/"			#to be added
+wifiScriptPath = "/home/rospi/I2C_LCD/wifi_code.py"		#to be added
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(4, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(channel, GPIO.FALLING, callback=wifiCallback, bouncetime=200)
 
 mylcd = I2Clcd_Lib.lcd()
 mylcd.lcd_clear()
 
 def currentSSID():
-	SSID = subprocess.check_output(['iwgetid -r'], shell = True)
+	status = subprocess.check_output(['iw wlan0 link'], shell = True)
+	SSID = "Not Connected"
+	if (status.startswith('Not connected') == False):
+		SSID = subprocess.check_output(['iwgetid -r'], shell = True)
+	
 	return SSID
 
 def currentIP():
@@ -23,23 +28,26 @@ def currentIP():
 	return IP
 
 def currentTime():
-	string = str(datetime.now().strftime('%H:%M:%S %d/%m/%Y'))
+	string = str(datetime.now().strftime('%H:%M:%S'))
 	return string
 
 def getCPUtemp():
-    res = os.popen('vcgencmd measure_temp').readline()
-    return(res.replace("temp=","").replace("'C\n",""))
+	res = os.popen('vcgencmd measure_temp').readline()
+    	return(res.replace("temp=","").replace("'C\n",""))
 
 def getCPUuse():
-    return(str(os.popen("top -n1 | awk '/Cpu\(s\):/ {print $2}'").readline().strip(\)))
+  	return psutil.cpu_percent()
 
 def wifiCallback(channel):
 	subprocess.call(['python '+ wifiScriptPath], shell = True)
 
 
+GPIO.add_event_detect(4, GPIO.FALLING, callback=wifiCallback, bouncetime=200)
 
 #MAIN LOOP
+screen = 1
 while True:
+	mylcd.lcd_clear()
 	if (screen == 1):
 		mylcd.lcd_display_string_pos(currentSSID(), 1,0)
 		mylcd.lcd_display_string_pos(currentIP(), 2,0)
@@ -50,10 +58,18 @@ while True:
 		mylcd.lcd_clear()
 
 	endTime = time.time() + 5
-	time = currentTime()
+	time1 = currentTime()
 
 	if (screen == 2):
+		CPU_Temp_String = str(getCPUtemp()) + "C"
+		CPU_Usage_String = str(getCPUuse()) + "%"
 		while (endTime > time.time()):
-			if(currentTime() != time):
-				mylcd.lcd_display_string_pos(currentTime(), 1,0)
-				time = currentTime()
+			if(currentTime() != time1):
+				currentTime_String = "Time: " + currentTime()
+				mylcd.lcd_clear()
+				mylcd.lcd_display_string_pos(currentTime_String, 1,0)
+				mylcd.lcd_display_string_pos(CPU_Temp_String,2,0)
+				mylcd.lcd_display_string_pos(CPU_Usage_String,2,9)
+				time1 = currentTime()
+		screen = 1
+
