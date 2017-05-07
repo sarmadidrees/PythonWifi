@@ -4,12 +4,10 @@ import subprocess
 import psutil
 import os
 from datetime import datetime
+from datetime import timedelta
 import RPi.GPIO as GPIO
 
-_debug_ = False 		#for debug 
-btn_pressed = False
- 
-wifiScriptPath = "/home/rospi/I2C_LCD/wifi_code.py" #wifi code path
+wifiScriptPath = "/home/rospi/I2C_LCD/wifi_code.py" #to be added
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(4, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -32,8 +30,12 @@ def currentIP():
 	return IP
 
 def currentTime():
-	string = str(datetime.now().strftime('%H:%M:%S'))
-	return string
+	# string = str(datetime.now().strftime('%H:%M:%S'))
+    # need to change this and get SYSTEM UPTIME
+    with open('/proc/uptime', 'r') as f:
+        uptime_seconds = float(f.readline().split()[0])
+        uptime_string = str(timedelta(days=0, seconds = uptime_seconds))
+	return uptime_string
 
 def getCPUtemp():
 	res = os.popen('vcgencmd measure_temp').readline()
@@ -43,29 +45,40 @@ def getCPUuse():
   	return psutil.cpu_percent()
 
 def wifiCallback(channel):
-	global btn_pressed
-	time.sleep(.2)
-	if (GPIO.input(4)==False):
-		btn_pressed = True
-		print "callback"
+	GPIO.remove_event_detect(4)
+	global shuttingDown
+	button_press_time = time.time()
+	button_release_time = time.time()
+	while GPIO.input(4)==False:
+		time.sleep(1)
+		button_release_time = time.time()
+	print "PRESS TIME" + str(button_press_time)
+	print "RELEASE TIME" + str(button_release_time)
+	if button_release_time > (button_press_time+5):
+		shuttingDown = 1
+		mylcd.lcd_clear()
+		mylcd.lcd_display_string_pos("SHUTTING DOWN...",1,0)
+		print "SHUTTING DOWN"
+		time.sleep(5)
+		#subprocess.call(['sudo shutdown -h now'], shell = True)
+	else:
+		subprocess.call(['python '+ wifiScriptPath], shell = True)
+		shuttingDown = 0
+		GPIO.add_event_detect(4, GPIO.FALLING, callback=wifiCallback, bouncetime=200)
 
-GPIO.add_event_detect(4, GPIO.FALLING, callback=wifiCallback, bouncetime=600)
+GPIO.add_event_detect(4, GPIO.FALLING, callback=wifiCallback, bouncetime=200)
 
 #MAIN LOOP
 screen = 1
 while True:
 	mylcd.lcd_clear()
-	if (screen == 1):
-		if _debug_:
-			print currentSSID()
-			print currentIP()
-		else:
-			mylcd.lcd_clear()
-			mylcd.lcd_display_string_pos(currentSSID(), 1,0)
-			mylcd.lcd_display_string_pos(currentIP(), 2,0)
-
+	if (screen == 1 and shuttingDown==0):
+		mylcd.lcd_display_string_pos(currentSSID(), 1,0)
+		mylcd.lcd_display_string_pos(currentIP(), 2,0)
+		#print currentSSID()
+		#print currentIP()
 		z = 0
-		while (z<5 and btn_pressed == False):
+		while (z<5 and shuttingDown==0):
 			time.sleep(1)
 			z = z+1
 		screen = 2
@@ -74,51 +87,18 @@ while True:
 	endTime = time.time() + 5
 	time1 = currentTime()
 
-	if (screen == 2):
+	if (screen == 2 and shuttingDown==0):
 		CPU_Temp_String = str(getCPUtemp()) + "C"
 		CPU_Usage_String = str(getCPUuse()) + "%"
-		mylcd.lcd_display_string_pos("Time:           ", 1,0)			#uncomment later
-		#mylcd.lcd_display_string_pos("                ", 2,0)
-		while (endTime > time.time() and btn_pressed == False):
-			if(currentTime() != time1):
+		mylcd.lcd_display_string_pos("UpTime:         ", 1,0)
+		mylcd.lcd_display_string_pos("                ", 2,0)
+		while (endTime > time.time() and shuttingDown==0):
+			#if(currentTime() != time1):
 				currentTime_String =  currentTime()
-				if _debug_:
-					print currentTime_String
-				else:
-					mylcd.lcd_display_string_pos(currentTime_String, 1,6)
-					#mylcd.lcd_display_string_pos("                ", 2,0)
-					mylcd.lcd_display_string_pos(CPU_Temp_String,2,0)
-					mylcd.lcd_display_string_pos(CPU_Usage_String,2,9)
-					time1 = currentTime()
+				mylcd.lcd_display_string_pos(currentTime_String, 1,7)
+				mylcd.lcd_display_string_pos("                ", 2,0)
+				mylcd.lcd_display_string_pos(CPU_Temp_String,2,0)
+				mylcd.lcd_display_string_pos(CPU_Usage_String,2,9)
+				#time1 = currentTime()
+				time.sleep(1)
 		screen = 1
-
-	if (btn_pressed == True):
-		print "IN"
-		btn_press_time = time.time()
-		btn_release_time = time.time()
-		while GPIO.input(4)==False:
-			time.sleep(1)
-			btn_release_time = time.time()
-		print str(btn_press_time)
-		print str(btn_release_time)
-		if btn_release_time > (btn_press_time+5):
-			if (_debug_):
-				print "Shutdown"
-			else:
-				mylcd.lcd_clear()
-				mylcd.lcd_display_string_pos("Shutting Down....",1,0)
-				time.sleep(5)
-				subprocess.call(['shutdown -P now'], shell = True)
-		else:
-			if (_debug_):
-				print "Wifi script"
-				subprocess.call(['python '+ wifiScriptPath], shell = True)
-				time.sleep(2)
-			else:
-				mylcd.lcd_clear()
-				mylcd.lcd_display_string_pos("Launching Wifi",1,0)
-				mylcd.lcd_display_string_pos("Python Script",2,0)
-				subprocess.call(['python '+ wifiScriptPath], shell = True)
-				time.sleep(2)
-		btn_pressed = False
-		#screen = 1
