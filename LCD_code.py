@@ -32,8 +32,11 @@ def currentIP():
 	return IP
 
 def currentTime():
-	string = str(datetime.now().strftime('%H:%M:%S'))
-	return string
+	# string = str(datetime.now().strftime('%H:%M:%S'))
+    with open('/proc/uptime', 'r') as f:
+        uptime_seconds = float(f.readline().split()[0])
+	time_string = str(int(uptime_seconds/3600)) + ':' + str(int(uptime_seconds/60)) + ':' + str(int(uptime_seconds)%60)
+	return time_string
 
 def getCPUtemp():
 	res = os.popen('vcgencmd measure_temp').readline()
@@ -77,7 +80,7 @@ while True:
 	if (screen == 2):
 		CPU_Temp_String = str(getCPUtemp()) + "C"
 		CPU_Usage_String = str(getCPUuse()) + "%"
-		mylcd.lcd_display_string_pos("Time:           ", 1,0)			#uncomment later
+		mylcd.lcd_display_string_pos("Uptime:          ", 1,0)			#uncomment later
 		#mylcd.lcd_display_string_pos("                ", 2,0)
 		while (endTime > time.time() and btn_pressed == False):
 			if(currentTime() != time1):
@@ -85,7 +88,7 @@ while True:
 				if _debug_:
 					print currentTime_String
 				else:
-					mylcd.lcd_display_string_pos(currentTime_String, 1,6)
+					mylcd.lcd_display_string_pos(currentTime_String, 1,7)
 					#mylcd.lcd_display_string_pos("                ", 2,0)
 					mylcd.lcd_display_string_pos(CPU_Temp_String,2,0)
 					mylcd.lcd_display_string_pos(CPU_Usage_String,2,9)
