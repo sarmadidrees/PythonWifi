@@ -30,12 +30,12 @@ def currentIP():
 	return IP
 
 def currentTime():
-	# string = str(datetime.now().strftime('%H:%M:%S'))
+    # string = str(datetime.now().strftime('%H:%M:%S'))
     # need to change this and get SYSTEM UPTIME
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
-        uptime_string = str(timedelta(days=0, seconds = uptime_seconds))
-	return uptime_string
+	time_string = str(int(uptime_seconds/3600)) + ':' + str(int(uptime_seconds/60)) + ':' + str(int(uptime_seconds)%60)
+	return time_string
 
 def getCPUtemp():
 	res = os.popen('vcgencmd measure_temp').readline()
