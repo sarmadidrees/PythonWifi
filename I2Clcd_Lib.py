@@ -1,5 +1,3 @@
-# Library Code from: http://www.recantha.co.uk/blog/?p=4849
-
 import smbus
 from time import *
 

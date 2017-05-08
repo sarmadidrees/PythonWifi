@@ -8,6 +8,13 @@ Launching a python script at Pi boot:
 example: sudo python /home/pi/sample.py &
 ('&' make sures to not run in a forever loop)
 
-TODO:
+-Current commands are
+sudo python /home/rospi/I2C_LCD/wifi_code.py &
+sudo python /home/rospi/I2C_LCD/LCD_code.py &
+
+the /home/rospi/I2C_LCD/ is where we copied the script files.
+
+
+DONE:
 -Test on RspberryPi3
 -Add I2C LCD

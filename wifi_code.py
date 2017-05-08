@@ -1,11 +1,5 @@
-
 import time
 import subprocess
-
-#subprocess.call(['ifconfig wlp7s0 down'], shell = True)
-#time.sleep(1)
-#subprocess.call(['ifconfig wlp7s0 up'], shell = True)
-#time.sleep(1)
 
 wifiList = []
 priorityList = [
@@ -14,7 +8,6 @@ priorityList = [
 				['Tajurbagah','96020029'],
 				['maaz1','786786786']
 				]
-
 
 def scanWifi():
 	l1,l2 = 0,0
@@ -49,19 +42,6 @@ def connectWifi():
 		x = x+1
 		if x==lenght or connected==True:
 			break
-
-
-'''
-#for just checking/print in console
-def currentSSID():
-	SSID = subprocess.check_output(['iwgetid -r'], shell = True)
-	return SSID
-
-def currentIP():
-	p = subprocess.Popen(['hostname', '-I'], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-	IP, err = p.communicate()
-	return IP
-'''
 
 scanWifi()	
 connectWifi()
